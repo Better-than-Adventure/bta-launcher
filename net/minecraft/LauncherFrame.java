@@ -26,7 +26,7 @@ public class LauncherFrame extends Frame {
 	public LoginForm loginForm;
 
 	public LauncherFrame() {
-		super("Better than Adventure Launcher");
+		super("Better than Adventure! Launcher");
 
 		setBackground(Color.BLACK);
 		this.loginForm = new LoginForm(this);
@@ -84,7 +84,7 @@ public class LauncherFrame extends Frame {
 			validate();
 			this.launcher.start();
 			this.loginForm = null;
-			setTitle("Better than Adventure");
+			setTitle("Better than Adventure!");
 		} catch (Exception e) {
 			e.printStackTrace();
 			showError(e.toString());
@@ -130,7 +130,7 @@ public class LauncherFrame extends Frame {
 		this.launcher.start();
 		this.loginForm.loginOk();
 		this.loginForm = null;
-		setTitle("Better than Adventure");
+		setTitle("Better than Adventure!");
 	}
 
 	private void showError(String error) {

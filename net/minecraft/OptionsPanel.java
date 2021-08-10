@@ -12,18 +12,20 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.io.File;
 import java.net.URL;
 import javax.swing.JButton;
 import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JCheckBox;
 import javax.swing.border.EmptyBorder;
 
-public class OptionsPanel
-  extends JDialog {
-  private static final long serialVersionUID = 1L;
-  
-  public OptionsPanel(Frame parent) {
+public class OptionsPanel extends JDialog {
+	private static final long serialVersionUID = 1L;
+	public static boolean enablePrerelease;
+
+	public OptionsPanel(Frame parent) {
     super(parent);
     
     setModal(true);
@@ -91,9 +93,44 @@ public class OptionsPanel
           }
         });
     dirLink.setForeground(new Color(2105599));
+    fieldPanel.add(dirLink);
 
     
-    fieldPanel.add(dirLink);
+    labelPanel.add(new JLabel("Use snapshots and prereleases: ", 4));
+    JCheckBox checkBox = new JCheckBox();
+    File file = new File(Util.getWorkingDirectory() + "prerelease");
+    if (file.exists()) checkBox.setSelected(true);
+    checkBox.addActionListener(new ActionListener() {
+    	@Override
+    	public void actionPerformed(ActionEvent e)
+    	{
+    		if (checkBox.isSelected())
+    		{
+    			try 
+    			{
+    				file.createNewFile();
+    				enablePrerelease = true;
+    			}
+    			catch (Exception q)
+    			{
+    				checkBox.setSelected(false);
+    			}
+    		}
+    		else
+    		{
+    			try
+    			{
+    				file.delete();
+    			}
+    			catch (Exception q)
+    			{
+    				checkBox.setSelected(true);
+    				enablePrerelease = false;
+    			}
+    		}
+    	}
+    });
+    fieldPanel.add(checkBox);
     
     panel.add(optionsPanel, "Center");
     
@@ -117,8 +154,8 @@ public class OptionsPanel
   }
 }
 
-
-/* Location:              C:\Users\josep\Downloads\minecraft (1).jar!\net\minecraft\OptionsPanel.class
- * Java compiler version: 5 (49.0)
- * JD-Core Version:       1.1.3
+/*
+ * Location: C:\Users\josep\Downloads\minecraft
+ * (1).jar!\net\minecraft\OptionsPanel.class Java compiler version: 5 (49.0)
+ * JD-Core Version: 1.1.3
  */

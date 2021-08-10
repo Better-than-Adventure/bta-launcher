@@ -13,6 +13,8 @@
 /* 13 */       LauncherFrame.main(args);
 /*    */     } else {
 /*    */       try {
+				
+	
 /* 16 */         String pathToJar = MinecraftLauncher.class.getProtectionDomain().getCodeSource().getLocation().toURI().getPath();
 /*    */         
 /* 18 */         ArrayList<String> params = new ArrayList<String>();
