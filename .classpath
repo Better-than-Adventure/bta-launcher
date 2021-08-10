@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry kind="src" path=""/>
+	<classpathentry kind="lib" path="gson-2.8.7.jar"/>
+	<classpathentry kind="lib" path="lombok.jar"/>
+	<classpathentry kind="lib" path="mclaunch-util-lib-0.1.jar"/>
+	<classpathentry kind="output" path=""/>
+</classpath>
