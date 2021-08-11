@@ -96,7 +96,7 @@ public class OptionsPanel extends JDialog {
     dirLink.setForeground(new Color(2105599));
     fieldPanel.add(dirLink);
 
-    labelPanel.add(new JLabel("Select version:", 4));
+    labelPanel.add(new JLabel("Select version: ", 4));
     JComboBox<VersionItem> comboBox = new JComboBox<VersionItem>();
     comboBox.addItem(VersionItem.latestStable);
     comboBox.addItem(VersionItem.latestPrerelease);
