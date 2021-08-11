@@ -143,15 +143,18 @@ public class OptionsPanel extends JDialog {
 			{
 				MinecraftLauncher.options.prerelease = false;
 				MinecraftLauncher.options.versionOverride = "";
+				GameUpdater.forceUpdate = true;
 			}
 			else if (comboBox.getSelectedIndex() == 1)
 			{
 				MinecraftLauncher.options.prerelease = true;
 				MinecraftLauncher.options.versionOverride = "";
+				GameUpdater.forceUpdate = true;
 			}
 			else
 			{
 				MinecraftLauncher.options.versionOverride = ((VersionItem)comboBox.getSelectedItem()).release.body;
+				GameUpdater.forceUpdate = true;
 			}
 			Options.writeOptions(MinecraftLauncher.options);
 			MinecraftLauncher.updateSelectedRelease();
