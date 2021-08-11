@@ -32,23 +32,18 @@ import java.nio.file.Paths;
 import java.security.AccessControlException;
 import java.security.AccessController;
 import java.security.CodeSource;
-import java.security.MessageDigest;
 import java.security.PermissionCollection;
 import java.security.PrivilegedExceptionAction;
 import java.security.SecureClassLoader;
 import java.security.cert.Certificate;
 import java.util.Comparator;
 import java.util.Enumeration;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Properties;
 import java.util.StringTokenizer;
 import java.util.Vector;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
-import java.util.jar.JarOutputStream;
-import java.util.jar.Pack200;
 import java.util.stream.*;
 import java.util.zip.*;
 
@@ -77,9 +72,6 @@ public class GameUpdater implements Runnable {
 	protected String subtaskMessage = "";
 	protected int state = 1;
 
-	protected boolean lzmaSupported = false;
-
-	protected boolean pack200Supported = false;
 	protected String[] genericErrorMessage = new String[] { "An error occured while loading the applet.",
 			"Please contact support to resolve this issue.", "<placeholder for error message>" };
 
@@ -106,17 +98,6 @@ public class GameUpdater implements Runnable {
 	public void init() {
 		this.state = 1;
 
-		try {
-			Class.forName("LZMA.LzmaInputStream");
-			this.lzmaSupported = true;
-		} catch (Throwable throwable) {
-		}
-
-		try {
-			Pack200.class.getSimpleName();
-			this.pack200Supported = true;
-		} catch (Throwable throwable) {
-		}
 	}
 
 	private String generateStacktrace(Exception exception) {
@@ -153,13 +134,6 @@ public class GameUpdater implements Runnable {
 	}
 
 	protected String trimExtensionByCapabilities(String file) {
-		if (!this.pack200Supported) {
-			file = file.replaceAll(".pack", "");
-		}
-
-		if (!this.lzmaSupported) {
-			file = file.replaceAll(".lzma", "");
-		}
 		return file;
 	}
 
@@ -587,35 +561,6 @@ public class GameUpdater implements Runnable {
 		return is[0];
 	}
 
-	protected void extractLZMA(String in, String out) throws Exception {
-		File f = new File(in);
-		if (!f.exists())
-			return;
-		FileInputStream fileInputHandle = new FileInputStream(f);
-
-		Class<?> clazz = Class.forName("LZMA.LzmaInputStream");
-		Constructor<?> constructor = clazz.getDeclaredConstructor(new Class[] { InputStream.class });
-		InputStream inputHandle = (InputStream) constructor.newInstance(new Object[] { fileInputHandle });
-
-		OutputStream outputHandle = new FileOutputStream(out);
-
-		byte[] buffer = new byte[16384];
-
-		int ret = inputHandle.read(buffer);
-		while (ret >= 1) {
-			outputHandle.write(buffer, 0, ret);
-			ret = inputHandle.read(buffer);
-		}
-
-		inputHandle.close();
-		outputHandle.close();
-
-		outputHandle = null;
-		inputHandle = null;
-
-		f.delete();
-	}
-
 	protected void extractZip(String in, String out) throws Exception {
 		File f = new File(in);
 		if (!f.exists())
@@ -636,20 +581,6 @@ public class GameUpdater implements Runnable {
 		fos.close();
 		zis.closeEntry();
 		zis.close();
-
-		f.delete();
-	}
-
-	protected void extractPack(String in, String out) throws Exception {
-		File f = new File(in);
-		if (!f.exists())
-			return;
-		FileOutputStream fostream = new FileOutputStream(out);
-		JarOutputStream jostream = new JarOutputStream(fostream);
-
-		Pack200.Unpacker unpacker = Pack200.newUnpacker();
-		unpacker.unpack(f, jostream);
-		jostream.close();
 
 		f.delete();
 	}
@@ -684,21 +615,7 @@ public class GameUpdater implements Runnable {
 			this.percentage = 55 + (int) (increment * (i + 1));
 			String filename = getFileName(this.urlList[i]);
 
-			if (filename.endsWith(".pack.lzma")) {
-				this.subtaskMessage = "Extracting: " + filename + " to " + filename.replaceAll(".lzma", "");
-				extractLZMA(String.valueOf(path) + filename, String.valueOf(path) + filename.replaceAll(".lzma", ""));
-
-				this.subtaskMessage = "Extracting: " + filename.replaceAll(".lzma", "") + " to "
-						+ filename.replaceAll(".pack.lzma", "");
-				extractPack(String.valueOf(path) + filename.replaceAll(".lzma", ""),
-						String.valueOf(path) + filename.replaceAll(".pack.lzma", ""));
-			} else if (filename.endsWith(".pack")) {
-				this.subtaskMessage = "Extracting: " + filename + " to " + filename.replace(".pack", "");
-				extractPack(String.valueOf(path) + filename, String.valueOf(path) + filename.replace(".pack", ""));
-			} else if (filename.endsWith(".lzma")) {
-				this.subtaskMessage = "Extracting: " + filename + " to " + filename.replace(".lzma", "");
-				extractLZMA(String.valueOf(path) + filename, String.valueOf(path) + filename.replace(".lzma", ""));
-			} else if (filename.endsWith("minecraft.jar")) {
+			if (filename.endsWith("minecraft.jar")) {
 				new File(String.valueOf(path) + "client.jar")
 						.renameTo(new File(String.valueOf(path) + "minecraft.jar"));
 				deleteMetaInf(String.valueOf(path) + "minecraft.jar");
@@ -817,13 +734,6 @@ public class GameUpdater implements Runnable {
 
 		if (fileName.contains("?")) {
 			fileName = fileName.substring(0, fileName.indexOf("?"));
-		}
-		if (fileName.endsWith(".pack.lzma")) {
-			fileName = fileName.replaceAll(".pack.lzma", "");
-		} else if (fileName.endsWith(".pack")) {
-			fileName = fileName.replaceAll(".pack", "");
-		} else if (fileName.endsWith(".lzma")) {
-			fileName = fileName.replaceAll(".lzma", "");
 		}
 
 		return fileName.substring(fileName.lastIndexOf('/') + 1);

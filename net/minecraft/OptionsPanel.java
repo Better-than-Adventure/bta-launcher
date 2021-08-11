@@ -17,6 +17,7 @@ import java.net.URL;
 import javax.swing.JButton;
 import javax.swing.JDialog;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JComboBox;
 import javax.swing.JCheckBox;
@@ -154,8 +155,15 @@ public class OptionsPanel extends JDialog {
 			else
 			{
 				MinecraftLauncher.options.versionOverride = ((VersionItem)comboBox.getSelectedItem()).release.body;
+				MinecraftLauncher.options.prerelease = ((VersionItem)comboBox.getSelectedItem()).release.prerelease;
 				GameUpdater.forceUpdate = true;
 			}
+			
+			if (MinecraftLauncher.options.prerelease)
+			{
+				JOptionPane.showMessageDialog(parent, "Note: snapshots are *highly* unstable versions, even more so than the ones Mojang releases.\nWe are not responsible if your world gets corrupted, your PC bluescreens or it causes all-out nuclear war.");
+			}
+			
 			Options.writeOptions(MinecraftLauncher.options);
 			MinecraftLauncher.updateSelectedRelease();
 		}
