@@ -18,6 +18,7 @@ import javax.swing.JButton;
 import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JComboBox;
 import javax.swing.JCheckBox;
 import javax.swing.border.EmptyBorder;
 
@@ -95,43 +96,70 @@ public class OptionsPanel extends JDialog {
     dirLink.setForeground(new Color(2105599));
     fieldPanel.add(dirLink);
 
+    labelPanel.add(new JLabel("Select version:", 4));
+    JComboBox<VersionItem> comboBox = new JComboBox<VersionItem>();
+    comboBox.addItem(VersionItem.latestStable);
+    comboBox.addItem(VersionItem.latestPrerelease);
     
-    labelPanel.add(new JLabel("Use snapshots and prereleases: ", 4));
-    JCheckBox checkBox = new JCheckBox();
-    File file = new File(Util.getWorkingDirectory() + "prerelease");
-    if (file.exists()) checkBox.setSelected(true);
-    checkBox.addActionListener(new ActionListener() {
-    	@Override
-    	public void actionPerformed(ActionEvent e)
+    for (int i = 0; i < MinecraftLauncher.releases.length; i++)
+    {
+    	comboBox.addItem(new VersionItem(MinecraftLauncher.releases[i]));
+    }
+    
+    boolean foundIndex = false;
+    
+    if (!MinecraftLauncher.options.versionOverride.equals(""))
+    {
+        for (int i = 0; i < MinecraftLauncher.releases.length; i++)
+        {
+        	if (MinecraftLauncher.options.versionOverride.equals(MinecraftLauncher.releases[i].body))
+        	{
+        		comboBox.setSelectedIndex(i + 2);
+        		foundIndex = true;
+        	}
+        }
+    }
+    
+    if (!foundIndex)
+    {
+    	MinecraftLauncher.options.versionOverride = "";
+    	Options.writeOptions(MinecraftLauncher.options);
+    	
+    	if (MinecraftLauncher.options.prerelease)
     	{
-    		if (checkBox.isSelected())
-    		{
-    			try 
-    			{
-    				file.createNewFile();
-    				enablePrerelease = true;
-    			}
-    			catch (Exception q)
-    			{
-    				checkBox.setSelected(false);
-    			}
-    		}
-    		else
-    		{
-    			try
-    			{
-    				file.delete();
-    			}
-    			catch (Exception q)
-    			{
-    				checkBox.setSelected(true);
-    				enablePrerelease = false;
-    			}
-    		}
+    		comboBox.setSelectedIndex(1);
     	}
-    });
-    fieldPanel.add(checkBox);
+    	else
+    	{
+    		comboBox.setSelectedIndex(0);
+    	}
+    }
     
+    comboBox.addActionListener(new ActionListener() {
+
+		@Override
+		public void actionPerformed(ActionEvent e) {
+			if (comboBox.getSelectedIndex() == 0)
+			{
+				MinecraftLauncher.options.prerelease = false;
+				MinecraftLauncher.options.versionOverride = "";
+			}
+			else if (comboBox.getSelectedIndex() == 1)
+			{
+				MinecraftLauncher.options.prerelease = true;
+				MinecraftLauncher.options.versionOverride = "";
+			}
+			else
+			{
+				MinecraftLauncher.options.versionOverride = ((VersionItem)comboBox.getSelectedItem()).release.body;
+			}
+			Options.writeOptions(MinecraftLauncher.options);
+			MinecraftLauncher.updateSelectedRelease();
+		}
+    	
+    });
+    fieldPanel.add(comboBox);
+       
     panel.add(optionsPanel, "Center");
     
     JPanel buttonsPanel = new JPanel(new BorderLayout());

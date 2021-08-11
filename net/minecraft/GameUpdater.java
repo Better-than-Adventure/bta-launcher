@@ -96,11 +96,9 @@ public class GameUpdater implements Runnable {
 	public boolean pauseAskUpdate;
 	public boolean shouldUpdate;
 	public boolean skipUpdate;
-	public GithubRelease latestRelease;
 
 	public GameUpdater(String latestVersion, String mainGameUrl, boolean skipUpdate) {
-		this.latestRelease = GithubFetcher.getLatestRelease(OptionsPanel.enablePrerelease);
-		this.latestVersion = latestRelease.body;
+		this.latestVersion = MinecraftLauncher.selectedRelease.body;
 		this.mainGameUrl = mainGameUrl;
 		this.skipUpdate = skipUpdate;
 	}
@@ -400,7 +398,7 @@ public class GameUpdater implements Runnable {
 				url = new URL(
 						"https://launcher.mojang.com/v1/objects/43db9b498cb67058d2e12d394e6507722e71bb45/client.jar");
 			} else if (urlList[i].toString().endsWith("bta.jar")) {
-				url = new URL(latestRelease.assets[0].browser_download_url);
+				url = new URL(MinecraftLauncher.selectedRelease.assets[0].browser_download_url);
 			} else
 				url = urlList[i];
 			URLConnection urlconnection = url.openConnection();
@@ -432,7 +430,7 @@ public class GameUpdater implements Runnable {
 				url = new URL(
 						"https://launcher.mojang.com/v1/objects/43db9b498cb67058d2e12d394e6507722e71bb45/client.jar");
 			} else if (urlList[j].toString().endsWith("bta.jar")) {
-				url = new URL(latestRelease.assets[0].browser_download_url);
+				url = new URL(MinecraftLauncher.selectedRelease.assets[0].browser_download_url);
 			} else
 				url = urlList[j];
 

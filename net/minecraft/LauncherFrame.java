@@ -98,7 +98,6 @@ public class LauncherFrame extends Frame {
 		try
 		{
 			res = req.authenticate(YggdrasilAgent.getMinecraftAgent(), userName, password);
-			System.out.println("Look what I got: " + res.getAccessToken());
 		}
 		catch(Exception | YggdrasilError e)
 		{
@@ -115,13 +114,13 @@ public class LauncherFrame extends Frame {
 				}
 			}
 		}
-
+		
 		this.launcher = new Launcher();
 		this.launcher.customParameters.putAll(this.customParameters);
 		this.launcher.customParameters.put("userName", res.getSelectedProfile().getName());
 		this.launcher.customParameters.put("latestVersion", "0");
 		this.launcher.customParameters.put("downloadTicket", "0");
-		this.launcher.customParameters.put("sessionId", res.getAccessToken());
+		this.launcher.customParameters.put("sessionId", "token:" + res.getAccessToken() + ":" + res.getSelectedProfile().getId());
 		this.launcher.init();
 
 		removeAll();
