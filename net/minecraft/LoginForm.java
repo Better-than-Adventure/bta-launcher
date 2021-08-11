@@ -195,7 +195,8 @@ public class LoginForm
       (new Thread() {
           public void run() {
             try {
-              editorPane.setPage(new URL("http://mcupdate.tumblr.com/"));
+              editorPane.setPage(new URL("https://betterthanadventure.tumblr.com/"));
+              editorPane.getDocument().putProperty("ZOOM_FACTOR", new Double(2.5));
             } catch (Exception e) {
               e.printStackTrace();
               editorPane.setText("<html><body><font color=\"#808080\"><br><br><br><br><br><br><br><center>Failed to update news<br>" + e.toString() + "</center></font></body></html>");
