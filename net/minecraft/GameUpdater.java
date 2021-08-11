@@ -271,7 +271,14 @@ public class GameUpdater implements Runnable {
 	}
 
 	private void checkShouldUpdate() {
-		return;
+	    this.pauseAskUpdate = true;
+	    while (this.pauseAskUpdate) {
+	      try {
+	        Thread.sleep(1000L);
+	      } catch (InterruptedException e) {
+	        e.printStackTrace();
+	      } 
+	    } 
 	}
 
 	protected String readVersionFile(File file) throws Exception {
