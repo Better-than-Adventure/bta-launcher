@@ -139,40 +139,39 @@ public class GameUpdater implements Runnable {
 
 	protected void loadJarURLs() throws Exception {
 		this.state = 2;
-		String jarList = "lwjgl.jar, jinput.jar, lwjgl_util.jar, bta.jar, " + this.mainGameUrl;
-		jarList = trimExtensionByCapabilities(jarList);
+		String[] jarList = new String[7];
+		jarList[0] = "https://libraries.minecraft.net/org/lwjgl/lwjgl/lwjgl/2.9.0/lwjgl-2.9.0.jar";
+		jarList[1] = "https://libraries.minecraft.net/net/java/jinput/jinput/2.0.5/jinput-2.0.5.jar";
+		jarList[2] = "https://libraries.minecraft.net/org/lwjgl/lwjgl/lwjgl_util/2.9.0/lwjgl_util-2.9.0.jar";
+		jarList[3] = MinecraftLauncher.selectedRelease.assets[0].browser_download_url;
+		jarList[4] = "https://launcher.mojang.com/v1/objects/43db9b498cb67058d2e12d394e6507722e71bb45/client.jar";
 
-		StringTokenizer jar = new StringTokenizer(jarList, ", ");
-		int jarCount = jar.countTokens() + 1;
-
-		this.urlList = new URL[jarCount];
-
-		URL path = new URL("http://s3.amazonaws.com/MinecraftDownload/");
-
-		for (int i = 0; i < jarCount - 1; i++) {
-			this.urlList[i] = new URL(path, jar.nextToken());
-		}
+		this.urlList = new URL[jarList.length];
 
 		String osName = System.getProperty("os.name");
-		String nativeJar = null;
 
-		if (osName.startsWith("Win")) {
-			nativeJar = "windows_natives.jar";
-		} else if (osName.startsWith("Linux")) {
-			nativeJar = "linux_natives.jar";
-		} else if (osName.startsWith("Mac")) {
-			nativeJar = "macosx_natives.jar";
-		} else if (osName.startsWith("Solaris") || osName.startsWith("SunOS")) {
-			nativeJar = "solaris_natives.jar";
-		} else {
+		if (osName.startsWith("Win"))
+		{
+			jarList[5] = "https://libraries.minecraft.net/org/lwjgl/lwjgl/lwjgl-platform/2.9.0/lwjgl-platform-2.9.0-natives-windows.jar";
+			jarList[6] = "https://libraries.minecraft.net/net/java/jinput/jinput-platform/2.0.5/jinput-platform-2.0.5-natives-windows.jar";
+		} 
+		else if (osName.startsWith("Linux"))
+		{
+			jarList[5] = "https://libraries.minecraft.net/org/lwjgl/lwjgl/lwjgl-platform/2.9.0/lwjgl-platform-2.9.0-natives-linux.jar";
+			jarList[6] = "https://libraries.minecraft.net/net/java/jinput/jinput-platform/2.0.5/jinput-platform-2.0.5-natives-linux.jar";
+		} 
+		else if (osName.startsWith("Mac"))
+		{
+			jarList[5] = "https://libraries.minecraft.net/org/lwjgl/lwjgl/lwjgl-platform/2.9.0/lwjgl-platform-2.9.0-natives-osx.jar";
+			jarList[6] = "https://libraries.minecraft.net/net/java/jinput/jinput-platform/2.0.5/jinput-platform-2.0.5-natives-osx.jar";
+		} 
+		else 
+		{
 			fatalErrorOccured("OS (" + osName + ") not supported", null);
 		}
-
-		if (nativeJar == null) {
-			fatalErrorOccured("no lwjgl natives files found", null);
-		} else {
-			nativeJar = trimExtensionByCapabilities(nativeJar);
-			this.urlList[jarCount - 1] = new URL(path, nativeJar);
+		
+		for (int i = 0; i < jarList.length; i++) {
+			this.urlList[i] = new URL(jarList[i]);
 		}
 	}
 
@@ -219,7 +218,13 @@ public class GameUpdater implements Runnable {
 
 						downloadJars(path);
 						extractJars(path);
-						extractNatives(path);
+						for (int i = 0; i < urlList.length; i++)
+						{
+							if (urlList[i].toString().contains("natives"))
+							{
+								extractNatives(path, urlList[i]);
+							}
+						}
 
 						if (this.latestVersion != null) {
 							this.percentage = 90;
@@ -272,11 +277,14 @@ public class GameUpdater implements Runnable {
 		this.state = 6;
 
 		this.percentage = 95;
-
-		URL[] urls = new URL[this.urlList.length];
-		for (int i = 0; i < this.urlList.length; i++) {
-			urls[i] = (new File(dir, getJarName(this.urlList[i]))).toURI().toURL();
-		}
+		
+		URL[] urls = {
+				new File(dir, "lwjgl.jar").toURI().toURL(),
+				new File(dir, "jinput.jar").toURI().toURL(),
+				new File(dir, "lwjgl_util.jar").toURI().toURL(),
+				new File(dir, "bta.jar").toURI().toURL(),
+				new File(dir, "minecraft.jar").toURI().toURL()
+		};
 
 		if (classLoader == null) {
 			classLoader = new URLClassLoader(urls) {
@@ -374,14 +382,7 @@ public class GameUpdater implements Runnable {
 		boolean[] skip = new boolean[this.urlList.length];
 
 		for (int i = 0; i < this.urlList.length; i++) {
-			URL url;
-			if (urlList[i].toString().endsWith("minecraft.jar")) {
-				url = new URL(
-						"https://launcher.mojang.com/v1/objects/43db9b498cb67058d2e12d394e6507722e71bb45/client.jar");
-			} else if (urlList[i].toString().endsWith("bta.jar")) {
-				url = new URL(MinecraftLauncher.selectedRelease.assets[0].browser_download_url);
-			} else
-				url = urlList[i];
+			URL url = urlList[i];
 			URLConnection urlconnection = url.openConnection();
 			urlconnection.setDefaultUseCaches(false);
 			skip[i] = false;
@@ -406,14 +407,7 @@ public class GameUpdater implements Runnable {
 
 		byte[] buffer = new byte[65536];
 		for (int j = 0; j < this.urlList.length; j++) {
-			URL url;
-			if (urlList[j].toString().endsWith("minecraft.jar")) {
-				url = new URL(
-						"https://launcher.mojang.com/v1/objects/43db9b498cb67058d2e12d394e6507722e71bb45/client.jar");
-			} else if (urlList[j].toString().endsWith("bta.jar")) {
-				url = new URL(MinecraftLauncher.selectedRelease.assets[0].browser_download_url);
-			} else
-				url = urlList[j];
+			URL url = urlList[j];
 
 			if (skip[j]) {
 				this.percentage = initialPercentage + fileSizes[j] * 45 / this.totalSizeDownload;
@@ -592,12 +586,14 @@ public class GameUpdater implements Runnable {
 
 		try {
 			try (FileSystem zipfs = FileSystems.newFileSystem(zip_path, null)) {
-				Path path = zipfs.getPath("META-INF");
-				final List<Path> pathsToDelete = Files.walk(path).sorted(Comparator.naturalOrder())
-						.collect(Collectors.toList());
-				for (Path subPath : pathsToDelete) {
-					Files.deleteIfExists(subPath);
-				}
+				Path path = zipfs.getPath("META-INF/MANIFEST.MF");
+				Files.deleteIfExists(path);
+				path = zipfs.getPath("META-INF/MOJANG_C.DSA");
+				Files.deleteIfExists(path);
+				path = zipfs.getPath("META-INF/MOJANG_C.SF");
+				Files.deleteIfExists(path);
+				path = zipfs.getPath("META-INF");
+				Files.deleteIfExists(path);
 			}			
 		}
 		catch (Exception e)
@@ -615,20 +611,32 @@ public class GameUpdater implements Runnable {
 			this.percentage = 55 + (int) (increment * (i + 1));
 			String filename = getFileName(this.urlList[i]);
 
-			if (filename.endsWith("minecraft.jar")) {
-				new File(String.valueOf(path) + "client.jar")
-						.renameTo(new File(String.valueOf(path) + "minecraft.jar"));
+			if (filename.endsWith("client.jar"))
+			{
+				new File(String.valueOf(path) + "client.jar").renameTo(new File(String.valueOf(path) + "minecraft.jar"));
 				deleteMetaInf(String.valueOf(path) + "minecraft.jar");
+			}
+			else if (filename.endsWith("jinput-2.0.5.jar"))
+			{
+				new File(String.valueOf(path) + "jinput-2.0.5.jar").renameTo(new File(String.valueOf(path) + "jinput.jar"));
+			}
+			else if (filename.endsWith("lwjgl_util-2.9.0.jar"))
+			{
+				new File(String.valueOf(path) + "lwjgl_util-2.9.0.jar").renameTo(new File(String.valueOf(path) + "lwjgl_util.jar"));
+			}
+			else if (filename.endsWith("lwjgl-2.9.0.jar"))
+			{
+				new File(String.valueOf(path) + "lwjgl-2.9.0.jar").renameTo(new File(String.valueOf(path) + "lwjgl.jar"));
 			}
 		}
 	}
 
-	protected void extractNatives(String path) throws Exception {
+	protected void extractNatives(String path, URL jarPath) throws Exception {
 		this.state = 5;
 
 		int initialPercentage = this.percentage;
 
-		String nativeJar = getJarName(this.urlList[this.urlList.length - 1]);
+		String nativeJar = getJarName(jarPath);
 
 		Certificate[] certificate = Launcher.class.getProtectionDomain().getCodeSource().getCertificates();
 
