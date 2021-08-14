@@ -104,15 +104,9 @@ public class LauncherFrame extends Frame {
 			e.printStackTrace();
 			if (e instanceof YggdrasilError)
 			{
-				if (((YggdrasilError) e).getError() == "ForbiddenOperationException")
-				{
-					showError("Login failed");
-				}
-				else
-				{
-					showError(((YggdrasilError) e).getError());
-				}
+				showError(((YggdrasilError) e).getErrorMessage());
 			}
+			return;
 		}
 		
 		this.launcher = new Launcher();
