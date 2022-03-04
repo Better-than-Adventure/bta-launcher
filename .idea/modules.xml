@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/minecraft.iml" filepath="$PROJECT_DIR$/minecraft.iml" />
+      <module fileurl="file://$PROJECT_DIR$/BTALauncher.iml" filepath="$PROJECT_DIR$/BTALauncher.iml" />
     </modules>
   </component>
 </project>

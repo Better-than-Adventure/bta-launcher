@@ -14,11 +14,13 @@ public class Options
 {
 	public boolean prerelease;
 	public String versionOverride;
+	public int ramAllocated;
 	
 	public Options()
 	{
 		prerelease = false;
 		versionOverride = "";
+		ramAllocated = 4096;
 	}
 	
 	public static Options readOptions()

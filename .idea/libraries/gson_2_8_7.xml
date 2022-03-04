@@ -1,0 +1,11 @@
+<component name="libraryTable">
+  <library name="gson-2.8.7">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/gson-2.8.7.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lombok.jar!/" />
+      <root url="jar://$PROJECT_DIR$/mclaunch-util-lib-0.1.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>
